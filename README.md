@@ -55,7 +55,7 @@ git clone https://github.com/nanofatdog/fb_reel_dl.git
 cd fb_reel_dl
 pip install -r requirements.txt
 playwright install chromium
-python fb_reel_dl.py --help
+python run.py --help
 ```
 
 ---
@@ -120,7 +120,7 @@ fb-reel-dl <url> --output ./my_videos
 
 ```
 fb_reel_dl/
-├── fb_reel_dl.py          # main script
+├── run.py                 # local dev wrapper
 ├── requirements.txt
 ├── README.md
 ├── install.sh
@@ -269,7 +269,7 @@ git clone https://github.com/nanofatdog/fb_reel_dl.git
 cd fb_reel_dl
 pip install -r requirements.txt
 playwright install chromium
-python fb_reel_dl.py --help
+python run.py --help
 ```
 
 ---
@@ -335,7 +335,7 @@ fb-reel-dl <url> --output ./my_videos
 
 ```
 fb_reel_dl/
-├── fb_reel_dl.py          # main script
+├── run.py                 # local dev wrapper
 ├── requirements.txt
 ├── README.md
 ├── install.sh
