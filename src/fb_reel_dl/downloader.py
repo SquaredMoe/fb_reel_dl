@@ -5,7 +5,6 @@ Playwright-based infinite scroll to collect Facebook Reel URLs,
 then yt-dlp to download them.
 """
 
-import asyncio
 import csv
 import json
 import os
@@ -14,7 +13,6 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from urllib.parse import urlparse, urlunparse
 from datetime import datetime
 
 from playwright.async_api import async_playwright, TimeoutError as PWTimeoutError
