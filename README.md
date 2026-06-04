@@ -1,7 +1,7 @@
 # fb_reel_dl 📱
 
-> **Facebook Reels Bulk Downloader** — ดาวน์โหลด Reels ทั้งหมดจาก Facebook Profile
-> ด้วย Playwright + yt-dlp แบบ自动化 (Automated scroll + download)
+> **Facebook Reels Bulk Downloader** — Download all Facebook Reels from a profile
+> using Playwright + yt-dlp (automated scroll + batch download)
 
 ---
 
@@ -9,10 +9,224 @@
 
 | Feature | Description |
 |---------|-------------|
-| 🎯 **Bulk download** | Scroll infinite scroll เก็บ reel URLs ทั้งหมด → ดาวน์โหลด |
-| 🕵️ **Headless mode** | รันแบบไม่เห็น browser (default) |
+| 🎯 **Bulk download** | Infinite scroll to collect all reel URLs → batch download |
+| 🕵️ **Headless mode** | Run without visible browser (default) |
+| 👁️ **Visible mode** | Show browser UI — log in manually if needed |
+| 🍪 **Cookie support** | Load cookies from JSON — no repeated login |
+| 📋 **Dry-run mode** | Collect URLs only, skip video download |
+| 📊 **CSV export** | Save reel_id + URL as CSV |
+| 🧹 **Auto-cleanup** | Strip tracking params, deduplicate by reel ID |
+| 🚀 **yt-dlp backend** | High-speed, resume support, retry logic |
+
+---
+
+## 🔧 Installation
+
+### Option 1: pip install (recommended) 🐍
+
+```bash
+pip install fb-reel-dl
+playwright install chromium
+```
+
+Then use `fb-reel-dl` directly:
+
+```bash
+fb-reel-dl "https://www.facebook.com/your-profile/reels_tab"
+```
+
+### Option 2: pip from GitHub
+
+```bash
+pip install git+https://github.com/nanofatdog/fb_reel_dl.git
+playwright install chromium
+```
+
+### Option 3: One-liner (curl → bash) 🚀
+
+```bash
+curl -sL https://raw.githubusercontent.com/nanofatdog/fb_reel_dl/main/install.sh | bash
+```
+
+### Option 4: Manual clone
+
+```bash
+git clone https://github.com/nanofatdog/fb_reel_dl.git
+cd fb_reel_dl
+pip install -r requirements.txt
+playwright install chromium
+python fb_reel_dl.py --help
+```
+
+---
+
+## 📖 Usage
+
+### 🎬 Download all reels (headless)
+
+```bash
+fb-reel-dl "https://www.facebook.com/your-profile/reels_tab"
+```
+
+Or using Python module:
+```bash
+python -m fb_reel_dl "https://www.facebook.com/your-profile/reels_tab"
+```
+
+### 👁️ Show browser UI (log in manually)
+
+```bash
+fb-reel-dl <url> --visible
+```
+
+When browser opens:
+1. Log in to Facebook (if not already logged in)
+2. The script will automatically scroll to collect reels
+3. Press Ctrl+C to stop at any time
+
+### 🍪 Use cookies (skip login)
+
+Export cookies from a browser extension like [Cookie-Editor](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) → Export → JSON:
+
+```bash
+fb-reel-dl <url> --cookies fb_cookies.json
+```
+
+### 📋 Dry-run (URLs only, no download)
+
+```bash
+fb-reel-dl <url> --dry-run
+```
+
+Output files:
+- `downloads/<channel>/reels_list.csv` — reel_id + URL
+- `downloads/<channel>_urls.txt` — plain URLs
+
+### 🏷️ Custom output folder
+
+```bash
+fb-reel-dl <url> --name my_channel
+```
+
+### 📂 Custom output directory
+
+```bash
+fb-reel-dl <url> --output ./my_videos
+```
+
+---
+
+## 📂 Output structure
+
+```
+fb_reel_dl/
+├── fb_reel_dl.py          # main script
+├── requirements.txt
+├── README.md
+├── install.sh
+└── downloads/
+    └── <channel_name>/     # change with --name
+        ├── reel_12345.mp4
+        ├── reel_67890.mp4
+        └── ...
+    └── <channel_name>_urls.txt   # URL list
+```
+
+---
+
+## ⚙️ How it works
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  1. Playwright launches Chromium                               │
+│     → Opens Facebook profile ?sk=reels_tab                     │
+│                                                                │
+│  2. Handle popups / login                                       │
+│     → Dismiss popups, wait for page load                        │
+│                                                                │
+│  3. Infinite scroll (up to 200 passes)                          │
+│     → Collect every <a href="/reel/XXXX">                      │
+│     → Strip tracking params, deduplicate by reel ID             │
+│                                                                │
+│  4. Auto-stop after 5 scrolls with no new reels                 │
+│                                                                │
+│  5. Feed URL list to yt-dlp                                     │
+│     → yt-dlp downloads MP4 to downloads/<channel>/              │
+│                                                                │
+│  6. Done! 🎉                                                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔑 Exporting cookies (for --cookies)
+
+Best for: log in once, export cookies, reuse without logging in again.
+
+1. Install [Cookie-Editor](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) extension
+2. Go to [facebook.com](https://facebook.com) and log in
+3. Click Cookie-Editor icon → Export → JSON
+4. Save as `fb_cookies.json`
+5. Run:
+
+```bash
+fb-reel-dl "https://www.facebook.com/your-profile/reels_tab" --cookies fb_cookies.json
+```
+
+---
+
+## 🚨 Troubleshooting
+
+| Problem | Cause | Solution |
+|---------|-------|----------|
+| `SessionNotCreatedException` | Chrome/Chromium not installed | `playwright install chromium` |
+| No reels found | Not logged in | Use `--visible` or `--cookies` |
+| Popup not dismissed | FB UI changed | Use `--visible` to handle manually |
+| yt-dlp error | Not installed correctly | `pip install -U yt-dlp` |
+| `ModuleNotFoundError` | Missing dependency | `pip install -r requirements.txt` |
+
+---
+
+## 📦 Dependencies
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| [playwright](https://playwright.dev/) | >= 1.40 | Browser automation (scroll, collect URLs) |
+| [yt-dlp](https://github.com/yt-dlp/yt-dlp) | >= 2024 | Video download engine |
+
+---
+
+## 📝 License
+
+MIT © [nanofatdog](https://github.com/nanofatdog)
+
+---
+
+## 🙏 Credits
+
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) — best community downloader
+- [Playwright](https://playwright.dev/) — Microsoft's browser automation
+- [duongxthanh/facebook-reels-downloader](https://github.com/duongxthanh/facebook-reels-downloader) — inspiration
+
+---
+
+---
+
+# fb_reel_dl 📱 (ภาษาไทย)
+
+> **Facebook Reels Bulk Downloader** — ดาวน์โหลด Reels ทั้งหมดจาก Facebook Profile
+> ด้วย Playwright + yt-dlp แบบอัตโนมัติ
+
+---
+
+## ✨ ความสามารถ
+
+| Feature | รายละเอียด |
+|---------|------------|
+| 🎯 **โหลดทีละมากๆ** | Scroll อัตโนมัติ เก็บ reel URLs ทั้งหมด → ดาวน์โหลด |
+| 🕵️ **Headless mode** | รันแบบไม่เห็น browser (ค่าเริ่มต้น) |
 | 👁️ **Visible mode** | เห็น browser UI — ใช้ login ด้วยตนเองได้ |
-| 🍪 **Cookie support** | รองรับ cookies JSON — ไม่ต้อง login ทุกครั้ง |
+| 🍪 **รองรับ Cookies** | ใช้ cookies JSON — ไม่ต้อง login ทุกครั้ง |
 | 📋 **Dry-run mode** | แค่เก็บ URL list, ยังไม่โหลดวิดีโอ |
 | 📊 **CSV export** | บันทึก reel_id + URL เป็น CSV |
 | 🧹 **Auto-cleanup** | ตัด tracking params, deduplicate reel URLs |
@@ -20,36 +234,42 @@
 
 ---
 
-## 🔧 Installation
+## 🔧 วิธีติดตั้ง
 
-### วิธีที่ 1: One-liner (curl → bash) 🚀
+### วิธีที่ 1: pip install (แนะนำ!) 🐍
+
+```bash
+pip install fb-reel-dl
+playwright install chromium
+```
+
+จากนั้นใช้คำสั่ง `fb-reel-dl` ได้เลย!
+
+```bash
+fb-reel-dl "https://www.facebook.com/your-profile/reels_tab"
+```
+
+### วิธีที่ 2: pip จาก GitHub
+
+```bash
+pip install git+https://github.com/nanofatdog/fb_reel_dl.git
+playwright install chromium
+```
+
+### วิธีที่ 3: One-liner (curl → bash) 🚀
 
 ```bash
 curl -sL https://raw.githubusercontent.com/nanofatdog/fb_reel_dl/main/install.sh | bash
 ```
 
-### วิธีที่ 2: Manual
+### วิธีที่ 4: Clone ด้วยตนเอง
 
 ```bash
-# Clone
 git clone https://github.com/nanofatdog/fb_reel_dl.git
 cd fb_reel_dl
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Install Playwright browser (Chromium)
 playwright install chromium
-
-# พร้อมใช้งาน!
 python fb_reel_dl.py --help
-```
-
-### วิธีที่ 3: pip install (อนาคต)
-
-```bash
-# (coming soon)
-pip install fb-reel-dl
 ```
 
 ---
@@ -59,13 +279,18 @@ pip install fb-reel-dl
 ### 🎬 ดาวน์โหลด reels ทั้งหมด (headless)
 
 ```bash
-python fb_reel_dl.py "https://www.facebook.com/profile.php?id=100080117672198&sk=reels_tab"
+fb-reel-dl "https://www.facebook.com/your-profile/reels_tab"
+```
+
+หรือใช้ python module:
+```bash
+python -m fb_reel_dl "https://www.facebook.com/your-profile/reels_tab"
 ```
 
 ### 👁️ เห็น browser UI (login ด้วยตนเอง)
 
 ```bash
-python fb_reel_dl.py "https://www.facebook.com/..." --visible
+fb-reel-dl <url> --visible
 ```
 
 พอ browser เปิดขึ้นมา:
@@ -79,13 +304,13 @@ Export cookies จาก browser extension เช่น [Cookie-Editor](https://
 → Export → JSON → แล้วใช้:
 
 ```bash
-python fb_reel_dl.py <url> --cookies fb_cookies.json
+fb-reel-dl <url> --cookies fb_cookies.json
 ```
 
 ### 📋 แค่เก็บ URLs (ไม่โหลด)
 
 ```bash
-python fb_reel_dl.py <url> --dry-run
+fb-reel-dl <url> --dry-run
 ```
 
 ได้ไฟล์:
@@ -95,12 +320,18 @@ python fb_reel_dl.py <url> --dry-run
 ### 🏷️ กำหนดชื่อ output folder
 
 ```bash
-python fb_reel_dl.py <url> --name my_channel
+fb-reel-dl <url> --name my_channel
+```
+
+### 📂 กำหนด output directory
+
+```bash
+fb-reel-dl <url> --output ./my_videos
 ```
 
 ---
 
-## 📂 Output structure
+## 📂 โครงสร้างไฟล์
 
 ```
 fb_reel_dl/
@@ -118,7 +349,7 @@ fb_reel_dl/
 
 ---
 
-## ⚙️ How it works — วิธีการทำงาน
+## ⚙️ วิธีการทำงาน
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -154,12 +385,12 @@ fb_reel_dl/
 5. รัน:
 
 ```bash
-python fb_reel_dl.py "https://www.facebook.com/profile.php?id=..." --cookies fb_cookies.json
+fb-reel-dl "https://www.facebook.com/your-profile/reels_tab" --cookies fb_cookies.json
 ```
 
 ---
 
-## 🚨 Troubleshooting
+## 🚨 แก้ไขปัญหา
 
 | ปัญหา | สาเหตุ | วิธีแก้ |
 |-------|--------|--------|
