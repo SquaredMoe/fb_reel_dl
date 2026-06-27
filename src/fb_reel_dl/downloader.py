@@ -17,6 +17,8 @@ from datetime import datetime
 
 from playwright.async_api import async_playwright, TimeoutError as PWTimeoutError
 
+from .cookies import extract_cookies_from_browser
+
 
 # ── Config ─────────────────────────────────────────────────
 SCROLL_STEPS = 200
@@ -54,6 +56,9 @@ def load_cookies(path: str) -> list[dict]:
         return []
 
 
+
+
+
 def get_channel_name(url: str, name_arg: str | None) -> str:
     if name_arg:
         return name_arg
@@ -66,6 +71,7 @@ def get_channel_name(url: str, name_arg: str | None) -> str:
 async def collect_reel_urls(
     url: str,
     cookies_path: str | None = None,
+    cookies_from_browser: str | None = None,
     headless: bool = True,
     output_base: str = "downloads",
 ) -> list[str]:
@@ -95,11 +101,24 @@ async def collect_reel_urls(
             ),
         )
 
+        # ── Cookie loading: priority → --cookies FILE > --cookies-from-browser
+        cookies_loaded = False
         if cookies_path:
             cookies = load_cookies(cookies_path)
             if cookies:
                 await context.add_cookies(cookies)
-                log(f"Loaded {len(cookies)} cookies", "🍪")
+                log(f"Loaded {len(cookies)} cookies from file", "🍪")
+                cookies_loaded = True
+        elif cookies_from_browser:
+            cookies = extract_cookies_from_browser(
+                cookies_from_browser, log_fn=log,
+            )
+            if cookies:
+                await context.add_cookies(cookies)
+                cookies_loaded = True
+
+        if not cookies_loaded:
+            log("No cookies loaded — may need login for reels", "🔑")
 
         page = await context.new_page()
 

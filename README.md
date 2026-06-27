@@ -12,7 +12,8 @@
 | 🎯 **Bulk download** | Infinite scroll to collect all reel URLs → batch download |
 | 🕵️ **Headless mode** | Run without visible browser (default) |
 | 👁️ **Visible mode** | Show browser UI — log in manually if needed |
-| 🍪 **Cookie support** | Load cookies from JSON — no repeated login |
+| 🍪 **Cookie file** | Load cookies from JSON export — no repeated login |
+| 🌐 **Browser cookies** | Extract cookies directly from installed browser (Chrome, Firefox, Brave, etc.) — no manual export needed |
 | 📋 **Dry-run mode** | Collect URLs only, skip video download |
 | 📊 **CSV export** | Save reel_id + URL as CSV |
 | 🧹 **Auto-cleanup** | Strip tracking params, deduplicate by reel ID |
@@ -92,6 +93,20 @@ Export cookies from a browser extension like [Cookie-Editor](https://chrome.goog
 fb-reel-dl <url> --cookies fb_cookies.json
 ```
 
+### 🌐 Use browser cookies (auto-extract, no export)
+
+Extract cookies directly from your installed browser — no JSON export needed:
+
+```bash
+fb-reel-dl <url> --cookies-from-browser chrome
+fb-reel-dl <url> --cookies-from-browser firefox
+fb-reel-dl <url> --cookies-from-browser brave
+```
+
+**Supported browsers:** `chrome`, `chromium`, `firefox`, `brave`, `edge`, `opera`, `opera_gx`, `vivaldi`, `arc`, `librewolf`, `safari`
+
+Just make sure you're **logged into Facebook** in that browser — the tool will extract only Facebook cookies and inject them into Playwright automatically.
+
 ### 📋 Dry-run (URLs only, no download)
 
 ```bash
@@ -159,9 +174,19 @@ fb_reel_dl/
 
 ---
 
-## 🔑 Exporting cookies (for --cookies)
+## 🔑 Exporting cookies (for --cookies / --cookies-from-browser)
 
-Best for: log in once, export cookies, reuse without logging in again.
+**💡 Tip:** New in v1.1 — use `--cookies-from-browser BROWSER` instead!
+No manual export needed. Just make sure you're logged into Facebook in your browser.
+
+### 🍪 Option A: Auto-extract (recommended)
+```bash
+fb-reel-dl <url> --cookies-from-browser chrome
+```
+See the [Browser cookies](#-use-browser-cookies-auto-extract-no-export) section above.
+
+### 🍪 Option B: Manual JSON export
+Best if: you want to share cookies across machines, or the auto-extract doesn't work.
 
 1. Install [Cookie-Editor](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) extension
 2. Go to [facebook.com](https://facebook.com) and log in
@@ -180,7 +205,7 @@ fb-reel-dl "https://www.facebook.com/your-profile/reels_tab" --cookies fb_cookie
 | Problem | Cause | Solution |
 |---------|-------|----------|
 | `SessionNotCreatedException` | Chrome/Chromium not installed | `playwright install chromium` |
-| No reels found | Not logged in | Use `--visible` or `--cookies` |
+| No reels found | Not logged in | Use `--visible`, `--cookies`, or `--cookies-from-browser` |
 | Popup not dismissed | FB UI changed | Use `--visible` to handle manually |
 | yt-dlp error | Not installed correctly | `pip install -U yt-dlp` |
 | `ModuleNotFoundError` | Missing dependency | `pip install -r requirements.txt` |
@@ -193,6 +218,7 @@ fb-reel-dl "https://www.facebook.com/your-profile/reels_tab" --cookies fb_cookie
 |---------|---------|---------|
 | [playwright](https://playwright.dev/) | >= 1.40 | Browser automation (scroll, collect URLs) |
 | [yt-dlp](https://github.com/yt-dlp/yt-dlp) | >= 2024 | Video download engine |
+| [browser-cookie3](https://github.com/borisbabic/browser_cookie3) | >= 0.19 | Extract cookies from installed browsers |
 
 ---
 
@@ -226,7 +252,8 @@ MIT © [nanofatdog](https://github.com/nanofatdog)
 | 🎯 **โหลดทีละมากๆ** | Scroll อัตโนมัติ เก็บ reel URLs ทั้งหมด → ดาวน์โหลด |
 | 🕵️ **Headless mode** | รันแบบไม่เห็น browser (ค่าเริ่มต้น) |
 | 👁️ **Visible mode** | เห็น browser UI — ใช้ login ด้วยตนเองได้ |
-| 🍪 **รองรับ Cookies** | ใช้ cookies JSON — ไม่ต้อง login ทุกครั้ง |
+| 🍪 **รองรับ Cookies (JSON)** | ใช้ cookies ที่ export เป็น JSON — ไม่ต้อง login ทุกครั้ง |
+| 🌐 **ดึง Cookies จาก Browser** | ดึง cookies จาก browser โดยตรง (Chrome, Firefox, Brave) — ไม่ต้อง export เอง |
 | 📋 **Dry-run mode** | แค่เก็บ URL list, ยังไม่โหลดวิดีโอ |
 | 📊 **CSV export** | บันทึก reel_id + URL เป็น CSV |
 | 🧹 **Auto-cleanup** | ตัด tracking params, deduplicate reel URLs |
@@ -307,6 +334,20 @@ Export cookies จาก browser extension เช่น [Cookie-Editor](https://
 fb-reel-dl <url> --cookies fb_cookies.json
 ```
 
+### 🌐 ใช้ cookies จาก browser (ดึงอัตโนมัติ ไม่ต้อง export)
+
+ดึง cookies จาก browser ที่ติดตั้งในเครื่องโดยตรง — ไม่ต้อง export JSON:
+
+```bash
+fb-reel-dl <url> --cookies-from-browser chrome
+fb-reel-dl <url> --cookies-from-browser firefox
+fb-reel-dl <url> --cookies-from-browser brave
+```
+
+**Browser ที่รองรับ:** `chrome`, `chromium`, `firefox`, `brave`, `edge`, `opera`, `opera_gx`, `vivaldi`, `arc`, `librewolf`, `safari`
+
+แค่ต้อง **login Facebook** ใน browser นั้นไว้ก่อน — tool จะดึงเฉพาะ cookies ของ Facebook แล้ว inject เข้า Playwright อัตโนมัติ
+
 ### 📋 แค่เก็บ URLs (ไม่โหลด)
 
 ```bash
@@ -374,9 +415,19 @@ fb_reel_dl/
 
 ---
 
-## 🔑 การ export cookies (สำหรับ --cookies)
+## 🔑 การ export cookies (สำหรับ --cookies / --cookies-from-browser)
 
-เหมาะสำหรับ: ใช้ครั้งเดียว login แล้ว export cookies → ใช้ซ้ำไม่ต้อง login อีก
+**💡 แนะนำ:** v1.1 ใหม่! ใช้ `--cookies-from-browser BROWSER` แทนได้
+ไม่ต้อง export cookies เอง แค่ login Facebook ไว้ใน browser นั้น
+
+### 🍪 วิธี A: ดึงอัตโนมัติ (แนะนำ)
+```bash
+fb-reel-dl <url> --cookies-from-browser chrome
+```
+ดูเพิ่มเติมที่หัวข้อ [Browser cookies](#🌐-ใช้-cookies-จาก-browser-ดึงอัตโนมัติ-ไม่ต้อง-export)
+
+### 🍪 วิธี B: Export JSON ด้วยตนเอง
+เหมาะสำหรับ: ต้องการแชร์ cookies ข้ามเครื่อง, หรือวิธี A ใช้ไม่ได้
 
 1. ติดตั้ง extension [Cookie-Editor](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm)
 2. ไปที่ [facebook.com](https://facebook.com) และ login
@@ -395,7 +446,7 @@ fb-reel-dl "https://www.facebook.com/your-profile/reels_tab" --cookies fb_cookie
 | ปัญหา | สาเหตุ | วิธีแก้ |
 |-------|--------|--------|
 | `SessionNotCreatedException` | Chrome/Chromium ไม่ได้ติดตั้ง | `playwright install chromium` |
-| ไม่พบ reel | ยังไม่ได้ login | ใช้ `--visible` หรือ `--cookies` |
+| ไม่พบ reel | ยังไม่ได้ login | ใช้ `--visible`, `--cookies`, หรือ `--cookies-from-browser` |
 | Popup จัดการไม่ได้ | FB เปลี่ยน UI | ลอง `--visible` เพื่อจัดการเอง |
 | yt-dlp error | ติดตั้งไม่ถูกต้อง | `pip install -U yt-dlp` |
 | `ModuleNotFoundError` | ขาด dependency | `pip install -r requirements.txt` |
@@ -408,6 +459,7 @@ fb-reel-dl "https://www.facebook.com/your-profile/reels_tab" --cookies fb_cookie
 |---------|---------|-----------|
 | [playwright](https://playwright.dev/) | >= 1.40 | Browser automation (scroll, collect URLs) |
 | [yt-dlp](https://github.com/yt-dlp/yt-dlp) | >= 2024 | Video download engine |
+| [browser-cookie3](https://github.com/borisbabic/browser_cookie3) | >= 0.19 | ดึง cookies จาก browser ที่ติดตั้งอยู่ |
 
 ---
 
